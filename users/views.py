@@ -1,6 +1,5 @@
 import json
-
-# from django.contrib.auth.models import User
+from django.contrib.auth import logout
 from users.models import User
 
 from django.core.exceptions import ValidationError
@@ -96,8 +95,8 @@ def login_user(request):
         request_data = json.loads(request.body.decode('utf-8'))
         email = request_data.get('email')
         plain_password = request_data.get('password')
-        temp_user = User.objects.all()
-        user = authenticate(request, username=temp_user[0].username, password=plain_password)
+        temp_user = User.objects.get(email=email)
+        user = authenticate(request, username=temp_user.username, password=plain_password)
         if user is not None:
             login(request, user)
             user_data = {
@@ -118,3 +117,8 @@ def login_user(request):
 
     return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
 
+
+@csrf_exempt
+def logout_view(request):
+    logout(request)
+    return JsonResponse({'message': 'You have been logged out'})
