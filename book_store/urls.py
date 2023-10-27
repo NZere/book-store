@@ -17,7 +17,6 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
-
 from users.views import my_authenticated_view, my_authenticated_admin_view
 
 urlpatterns = [
@@ -26,4 +25,6 @@ urlpatterns = [
     path("api/admin/isLoggedIn", my_authenticated_admin_view),
     path("api/auth/", include('users.urls')),
     path("api/books/", include('books.urls')),
+    path("api/cart/", include('carts.urls')),
+    path("api/reviews/", include('reviews.urls')),
 ]

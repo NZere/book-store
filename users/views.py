@@ -1,5 +1,7 @@
 import json
 from django.contrib.auth import logout
+from django.utils import timezone
+
 from users.models import User
 
 from django.core.exceptions import ValidationError
@@ -10,6 +12,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import permissions
 from rest_framework.decorators import api_view, permission_classes
+from carts.models import Cart
+
 
 # @xframe_options_exempt
 @csrf_exempt
@@ -99,13 +103,92 @@ def login_user(request):
         user = authenticate(request, username=temp_user.username, password=plain_password)
         if user is not None:
             login(request, user)
+            cart_items = []
+            cart = Cart.objects.filter(
+                user=user,
+                is_ordered=False
+            )
+            if cart.exists():
+                user_cart = cart[0]
+                for cart_item in user_cart.items.all():
+                    print(cart_item)
+                    cart_items.append({
+                        "bookId": cart_item.book.id,
+                        "title": cart_item.book.title,
+                        "image": cart_item.book.image.url,
+                        "price": cart_item.book.price,
+                        "quantity": cart_item.quantity,
+                    })
+            else:
+                ordered_date = timezone.now()
+                user_cart = Cart.objects.create(
+                    user=request.user, ordered_date=ordered_date)
             user_data = {
-                'cartItems': [],  # Replace with user-specific data
+                'cartItems': cart_items,
                 'email': user.email,
                 'isUser': user.is_active,  # Adjust based on your user model
                 'name': user.first_name,
                 '_id': user.id,
             }
+
+            return JsonResponse({
+                'status': 'success',
+                'message': f'You have been logged in as {user.first_name}',
+                'user': user_data,
+            }, status=200)
+
+        return JsonResponse({'status': 'error', 'message': 'Invalid login credentials.'}, status=400)
+
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method.'}, status=400)
+
+
+# @api_view(('POST',))
+@permission_classes((permissions.AllowAny,))
+@csrf_exempt
+def login_admin(request):
+    print("hh")
+    if request.method == 'POST':
+        request_data = json.loads(request.body.decode('utf-8'))
+        email = request_data.get('email')
+        plain_password = request_data.get('password')
+        otp = request_data.get('otp') if "otp" in request_data.keys() else None
+        if otp:
+            if otp!="11111":
+                JsonResponse({'status': 'error', 'message': 'Invalid OTP.'}, status=400)
+
+        temp_user = User.objects.get(email=email)
+        user = authenticate(request, username=temp_user.username, password=plain_password)
+        if user is not None:
+            login(request, user)
+            cart_items = []
+            cart = Cart.objects.filter(
+                user=user,
+                is_ordered=False
+            )
+            if cart.exists():
+                user_cart = cart[0]
+                for cart_item in user_cart.items.all():
+                    print(cart_item)
+                    cart_items.append({
+                        "bookId": cart_item.book.id,
+                        "title": cart_item.book.title,
+                        "image": cart_item.book.image.url,
+                        "price": cart_item.book.price,
+                        "quantity": cart_item.quantity,
+                    })
+            else:
+                ordered_date = timezone.now()
+                user_cart = Cart.objects.create(
+                    user=request.user, ordered_date=ordered_date)
+            user_data = {
+                'cartItems': cart_items,
+                'email': user.email,
+                'isUser': user.is_active,  # Adjust based on your user model
+                'name': user.first_name,
+                '_id': user.id,
+            }
+            if user.is_superuser:
+                user_data['isAdmin'] = True
 
             return JsonResponse({
                 'status': 'success',

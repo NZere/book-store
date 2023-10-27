@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "books",
     'users',
+    'carts',
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -141,5 +143,6 @@ CORS_ALLOWED_ORIGINS = [
     "http://your-production-domain.com",
 ]
 CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://localhost:3000', 'http://*.127.0.0.1']
 
 # APPEND_SLASH = False
