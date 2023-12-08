@@ -2,6 +2,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+
 class User(AbstractUser):
     name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
@@ -10,3 +11,9 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class OTP(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    secret_key = models.CharField(max_length=16)
+

@@ -146,3 +146,7 @@ CORS_ALLOW_CREDENTIALS = True
 CSRF_TRUSTED_ORIGINS = ['http://localhost', 'http://localhost:3000', 'http://*.127.0.0.1']
 
 # APPEND_SLASH = False
+# settings.py
+
+APP_PASSWORD = "ipwewlipwqupltli"
+SENDER_EMAIL = "nazzere.test@gmail.com"
